@@ -236,12 +236,14 @@ public class JsonSerdeBenchmark {
     }
 
     @Benchmark
-    public TestModel measureDraft_07_Sjf4jCompiled(final Sjf4jCompiledState impl, final ModelState model) {
+    public TestModel measureDraft_07_Sjf4jCompiled(
+            final Sjf4jCompiledState impl, final ModelState model) {
         return impl.roundTrip(model, SchemaSpec.DRAFT_07);
     }
 
     @Benchmark
-    public TestModel measureDraft_2020_12_Sjf4jCompiled(final Sjf4jCompiledState impl, final ModelState model) {
+    public TestModel measureDraft_2020_12_Sjf4jCompiled(
+            final Sjf4jCompiledState impl, final ModelState model) {
         return impl.roundTrip(model, SchemaSpec.DRAFT_2020_12);
     }
 

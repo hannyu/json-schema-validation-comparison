@@ -15,12 +15,17 @@
  */
 package org.creekservice.kafka.test.perf.implementations;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.Color;
+import java.net.URI;
+import java.util.Map;
+import java.util.Set;
 import org.creekservice.kafka.test.perf.model.TestModel;
 import org.creekservice.kafka.test.perf.testsuite.AdditionalSchemas;
 import org.creekservice.kafka.test.perf.testsuite.SchemaSpec;
+import org.sjf4j.CompiledInstances;
 import org.sjf4j.Sjf4j;
+import org.sjf4j.annotation.binding.Backend;
+import org.sjf4j.annotation.binding.CompiledBinder;
 import org.sjf4j.annotation.binding.Read;
 import org.sjf4j.annotation.binding.Write;
 import org.sjf4j.annotation.schema.CompiledValidator;
@@ -29,15 +34,6 @@ import org.sjf4j.schema.JsonSchema;
 import org.sjf4j.schema.SchemaDialect;
 import org.sjf4j.schema.SchemaPlan;
 import org.sjf4j.schema.SchemaRegistry;
-
-import java.awt.Color;
-import java.net.URI;
-import java.util.Map;
-import java.util.Set;
-
-import org.sjf4j.CompiledInstances;
-import org.sjf4j.annotation.binding.Backend;
-import org.sjf4j.annotation.binding.CompiledBinder;
 
 @SuppressWarnings("FieldMayBeFinal")
 public class Sjf4jCompiledImplementation implements Implementation {
@@ -50,7 +46,7 @@ public class Sjf4jCompiledImplementation implements Implementation {
                     Licence.MIT,
                     Set.of(SchemaSpec.DRAFT_2020_12, SchemaSpec.DRAFT_2019_09, SchemaSpec.DRAFT_07),
                     "https://github.com/sjf4j-projects/sjf4j",
-                    Color.CYAN,
+                    new Color(0, 170, 210),
                     Sjf4j.class,
                     MetaData.ACTIVE_PROJECT);
 
@@ -59,7 +55,7 @@ public class Sjf4jCompiledImplementation implements Implementation {
         return METADATA;
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private Sjf4j sjf4j = Sjf4j.global();
 
     @Override
     public JsonValidator prepare(
@@ -86,12 +82,8 @@ public class Sjf4jCompiledImplementation implements Implementation {
         return new JsonValidator() {
             @Override
             public void validate(final String json) {
-                try {
-                    final Object node = objectMapper.readValue(json, Object.class);
-                    plan.requireValid(node, enableFormatAssertions);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
+                final Object node = sjf4j.fromJson(json);
+                plan.requireValid(node, enableFormatAssertions);
             }
 
             @Override
@@ -112,13 +104,15 @@ public class Sjf4jCompiledImplementation implements Implementation {
         };
     }
 
-
     @CompiledBinder(backend = Backend.JACKSON2)
     interface TestModelBinder {
         TestModelBinder INSTANCE = CompiledInstances.create(TestModelBinder.class);
 
-        @Write byte[] serialize(TestModel model);
-        @Read TestModel deserialize(byte[] data);
+        @Write
+        byte[] serialize(TestModel model);
+
+        @Read
+        TestModel deserialize(byte[] data);
     }
 
     @CompiledValidator
@@ -128,6 +122,4 @@ public class Sjf4jCompiledImplementation implements Implementation {
         @ValidJsonSchema(ref = "classpath:/schema-draft-2020-12.json")
         void requireValid(TestModel model, boolean strictFormat);
     }
-
-
 }
