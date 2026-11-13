@@ -71,7 +71,7 @@ public class Sjf4jImplementation implements Implementation {
                 };
 
         for (Map.Entry<URI, String> entry : additionalSchemas.remotes().entrySet()) {
-            registry.index(entry.getKey(), JsonSchema.fromNode(entry.getValue()));
+            registry.index(entry.getKey(), JsonSchema.fromJson(entry.getValue()));
         }
         final SchemaPlan plan = jsonSchema.createPlan(registry);
 
